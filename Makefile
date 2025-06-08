@@ -1,3 +1,4 @@
+.PHONY: bin
 bin:
 	mkdir -p bin
 	cc -o bin/main -lm main.c
