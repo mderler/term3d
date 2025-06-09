@@ -25,6 +25,21 @@ void draw_box(Vector3 pos, char c, int a) {
 }
 
 int main() {
+
+  Matrix3x3 A = {{1,1,1}, {2, -1, 3}, {-1, 4, -1}};
+  Vector3 b = {6, 14, -2};
+  Vector3 x;
+
+  printf("before:\n\n");
+  print_matrix(&A);
+  print_vector(b);
+  printf("after:\n\n");
+
+  solve_equation_system(&A, &x, b);
+  print_matrix(&A);
+  print_vector(x);
+
+  /*
   hide_cursor();
   erase_screen();
   set_cursor_to_home();
@@ -38,10 +53,11 @@ int main() {
   while (1) {
     // draw_char(vector_add(offset, end), ' ');
     set_rotation_mat_z(&rot, phi);
-    end = mat_mul_v(rot, start);
+    end = mat_mul_v(&rot, start);
     draw_char(vector_add(offset, end), 'X');
     fflush(stdout);
     phi += 0.005;
     usleep(1000);
   }
+  */
 }
