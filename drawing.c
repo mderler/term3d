@@ -1,4 +1,5 @@
 #include "drawing.h"
+#include <stdio.h>
 
 void set_cursor_to_home() {
   const char str[] = "\033[H";
@@ -11,5 +12,12 @@ void erase_screen() { printf("\033[2J"); }
 
 void draw_char(int x, int y, char c) {
   set_cursor_pos(y, x * 2);
-  printf("[]\n", c);
+  putchar(c);
+  fflush(stdout);
+}
+
+void draw_str(int x, int y, const char *s) {
+  set_cursor_pos(y, x * 2);
+  fputs(s, stdout);
+  fflush(stdout);
 }

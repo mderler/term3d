@@ -10,5 +10,6 @@ void hide_cursor();
 void erase_screen();
 
 void draw_char(int x, int y, char c);
+void draw_str(int x, int y, const char *s);
 
 #endif

@@ -1,4 +1,6 @@
 #include "vmath.h"
+#include <assert.h>
+#include <stdio.h>
 
 Vector3 vector_add(Vector3 a, Vector3 b) {
   Vector3 v = {.x = a.x + b.x, .y = a.y + b.y, .z = a.z + b.z};
@@ -31,11 +33,11 @@ void set_mat_from_v(Matrix3x3 *mat, Vector3 v1, Vector3 v2, Vector3 v3) {
   (*mat)[2][2] = v3.z;
 }
 
-Vector3 mat_get_row(const Matrix3x3 mat, int idx) {
+Vector3 mat_get_row(const Matrix3x3 *mat, int idx) {
   Vector3 v;
-  v.x = mat[idx][0];
-  v.y = mat[idx][1];
-  v.z = mat[idx][2];
+  v.x = (*mat)[idx][0];
+  v.y = (*mat)[idx][1];
+  v.z = (*mat)[idx][2];
 
   return v;
 }
@@ -72,61 +74,169 @@ void set_rotation_mat_z(Matrix3x3 *mat, float phi) {
   (*mat)[2][2] = 1;
 }
 
+static float v_at(Vector3 v, int idx) {
+  switch (idx) {
+  case 0:
+    return v.x;
+  case 1:
+    return v.y;
+  case 2:
+    return v.z;
+  }
+
+  assert(0 && "unreachable");
+}
+
+static int is_in_range(float x, float epsilon) {
+  if (-epsilon <= x && x <= epsilon)
+    return 1;
+  return 0;
+}
+
+static void v_set_at(Vector3 *v, int idx, float value) {
+  switch (idx) {
+  case 0:
+    v->x = value;
+    return;
+  case 1:
+    v->y = value;
+    return;
+  case 2:
+    v->z = value;
+    return;
+  }
+
+  assert(0 && "unreachable");
+}
+
+static void print_mat_row_swapped(const Matrix3x3 *m, int rows[]) {
+  for (int i = 0; i < 3; i++) {
+    int idx = rows[i];
+    printf("| ");
+    for (int j = 0; j < 3; j++) {
+      printf("%7.4f ", (*m)[idx][j]);
+    }
+    printf("|\n");
+  }
+  printf("\n");
+}
+
+static void print_vec_swapped(Vector3 v, int rows[]) {
+  for (int i = 0; i < 3; i++) {
+    printf("| %7.4f |\n", v_at(v, rows[i]));
+  }
+}
+
 void solve_equation_system(Matrix3x3 *A, Vector3 *x, Vector3 b) {
-  // TODO: Support row swapping to position a non-zero pivot element at the top
+  const float EPSILON = 0.00001f;
 
-  // make the first column 0 for row 2 and 3
-  Vector3 row = mat_get_row(*A, 0);
+#ifdef DEBUG
+  printf("\n================= EQSYSTEM =================\n");
+  printf("A:\n");
+  print_matrix(A);
+  printf("b:\n");
+  print_vector(b);
+#endif
 
-  float factor = (*A)[1][0] / (*A)[0][0];
-  Vector3 to_sub = vector_scale(row, -factor);
-  mat_add_to_row(A, to_sub, 1);
-  b.y -= b.x * factor;
+  int row_order[3] = {0, 1, 2};
+  for (int i = 0; i < 3; i++) {
+    int pivot_row = i;
+    while (row_order[pivot_row] < 3 &&
+           is_in_range((*A)[row_order[pivot_row]][i], EPSILON)) {
+      pivot_row++;
+    }
 
-  factor = (*A)[2][0] / (*A)[0][0];
-  to_sub = vector_scale(row, -factor);
-  mat_add_to_row(A, to_sub, 2);
-  b.z -= b.x * factor;
+    if (pivot_row != i) {
+      int tmp = row_order[i];
+      row_order[i] = row_order[pivot_row];
+      row_order[pivot_row] = tmp;
+    }
 
-  // sub second row from thrid row
-  row = mat_get_row(*A, 1);
+    for (int j = i + 1; j < 3; j++) {
+      int i_row = row_order[i];
+      int j_row = row_order[j];
 
-  factor = (*A)[2][1] / (*A)[1][1];
-  to_sub = vector_scale(row, -factor);
-  mat_add_to_row(A, to_sub, 2);
-  b.z -= b.y * factor;
+      float factor = (*A)[j_row][i] / (*A)[i_row][i];
 
-  // sub third row from first and second row
-  row = mat_get_row(*A, 2);
+#ifdef DEBUG
+      printf("\n================= BEFORE =================\n");
+      printf("i=%d, j=%d, i_row=%d, j_row=%d, factor=%f\n", i, j, i_row, j_row,
+             factor);
+      printf("A:\n");
+      print_mat_row_swapped(A, row_order);
+      printf("b:\n");
+      print_vec_swapped(b, row_order);
+#endif
 
-  factor = (*A)[0][2] / (*A)[2][2];
-  to_sub = vector_scale(row, -factor);
-  mat_add_to_row(A, to_sub, 0);
-  b.x -= b.z * factor;
+      if (is_in_range(factor, EPSILON))
+        continue;
 
-  factor = (*A)[1][2] / (*A)[2][2];
-  to_sub = vector_scale(row, -factor);
-  mat_add_to_row(A, to_sub, 1);
-  b.y -= b.z * factor;
+      Vector3 pivot = mat_get_row(A, i_row);
+      Vector3 to_sub = vector_scale(pivot, -factor);
+      mat_add_to_row(A, to_sub, j_row);
+      v_set_at(&b, j_row, v_at(b, j_row) - factor * v_at(b, i_row));
 
-  // sub second row from first row
-  row = mat_get_row(*A, 1);
+#ifdef DEBUG
+      printf("\n================= AFTER =================\n");
+      printf("A:\n");
+      print_mat_row_swapped(A, row_order);
+      printf("b:\n");
+      print_vec_swapped(b, row_order);
+#endif
+    }
+  }
 
-  factor = (*A)[0][1] / (*A)[1][1];
-  to_sub = vector_scale(row, -factor);
-  mat_add_to_row(A, to_sub, 0);
-  b.x -= b.y * factor;
+  for (int i = 2; i >= 0; i--) {
+    for (int j = i - 1; j >= 0; j--) {
+      int i_row = row_order[i];
+      int j_row = row_order[j];
 
-  x->x = b.x / (*A)[0][0];
-  x->y = b.y / (*A)[1][1];
-  x->z = b.z / (*A)[2][2];
+      float factor = (*A)[j_row][i] / (*A)[i_row][i];
+
+#ifdef DEBUG
+      printf("\n================= BEFORE =================\n");
+      printf("i=%d, j=%d, i_row=%d, j_row=%d, factor=%f\n", i, j, i_row, j_row,
+             factor);
+      printf("A:\n");
+      print_mat_row_swapped(A, row_order);
+      printf("b:\n");
+      print_vec_swapped(b, row_order);
+#endif
+
+      if (is_in_range(factor, EPSILON))
+        continue;
+
+      Vector3 pivot = mat_get_row(A, i_row);
+      Vector3 to_sub = vector_scale(pivot, -factor);
+      mat_add_to_row(A, to_sub, j_row);
+      v_set_at(&b, j_row, v_at(b, j_row) - factor * v_at(b, i_row));
+
+#ifdef DEBUG
+      printf("\n================= AFTER =================\n");
+      printf("A:\n");
+      print_mat_row_swapped(A, row_order);
+      printf("b:\n");
+      print_vec_swapped(b, row_order);
+#endif
+    }
+  }
+
+#ifdef DEBUG
+  printf("\n================= SOLUTION =================\n");
+  print_mat_row_swapped(A, row_order);
+  print_vec_swapped(b, row_order);
+#endif
+
+  x->x = v_at(b, row_order[0]) / (*A)[row_order[0]][0];
+  x->y = v_at(b, row_order[1]) / (*A)[row_order[1]][1];
+  x->z = v_at(b, row_order[2]) / (*A)[row_order[2]][2];
 }
 
 void print_matrix(const Matrix3x3 *m) {
   for (int i = 0; i < 3; i++) {
     printf("| ");
     for (int j = 0; j < 3; j++) {
-      printf("%6.2f ", (*m)[i][j]);
+      printf("%7.4f ", (*m)[i][j]);
     }
     printf("|\n");
   }
@@ -134,7 +244,7 @@ void print_matrix(const Matrix3x3 *m) {
 }
 
 void print_vector(Vector3 v) {
-  printf("| %6.2f |\n", v.x);
-  printf("| %6.2f |\n", v.y);
-  printf("| %6.2f |\n", v.z);
+  printf("| %7.4f |\n", v.x);
+  printf("| %7.4f |\n", v.y);
+  printf("| %7.4f |\n", v.z);
 }

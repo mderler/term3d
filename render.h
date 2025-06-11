@@ -18,6 +18,7 @@ typedef struct {
 
 Camera init_camera(float fov, float plane_distance, float aspect_ratio);
 
+void draw_vertex(Screen screen, const Camera *cam, Vertex vertex, const char* str);
 void draw_vertecies(Screen screen, const Camera *cam, const Vertex *vertecies,
                     int vertex_count);
 

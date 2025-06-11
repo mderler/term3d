@@ -18,7 +18,7 @@ typedef float Matrix3x3[3][3];
 
 void set_mat_from_v(Matrix3x3 *mat, Vector3 v1, Vector3 v2, Vector3 v3);
 
-Vector3 mat_get_row(const Matrix3x3 mat, int idx);
+Vector3 mat_get_row(const Matrix3x3 *mat, int idx);
 
 void mat_add_to_row(Matrix3x3 *mat, Vector3 v, int idx);
 
