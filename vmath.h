@@ -24,6 +24,8 @@ void mat_add_to_row(Matrix3x3 *mat, Vector3 v, int idx);
 
 Vector3 mat_mul_v(const Matrix3x3 *mat, Vector3 vec);
 
+void set_rotation_mat_x(Matrix3x3 *mat, float phi);
+void set_rotation_mat_y(Matrix3x3 *mat, float phi);
 void set_rotation_mat_z(Matrix3x3 *mat, float phi);
 
 /*
