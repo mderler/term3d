@@ -1,6 +1,6 @@
 # term3d
 
-Simple terminal 3D renderer
+Simple terminal 3D renderer. Control and draw logic is platform dependent.
 
 ## Controls
 
