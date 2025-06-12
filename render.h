@@ -7,7 +7,7 @@ typedef Vector3 Vertex;
 
 typedef struct {
   Vector3 position;
-  float z_angle, x_angle;
+  float z_angle, y_angle;
 
   Vector3 plane_offset, pw, ph;
 } Camera;

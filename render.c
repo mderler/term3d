@@ -34,7 +34,7 @@ Camera init_camera(float fov, float plane_distance, float aspect_ratio) {
 
 void draw_vertex(Screen screen, const Camera *cam, Vertex vertex, const char *str) {
     Matrix3x3 rotx;
-    set_rotation_mat_z(&rotx, cam->x_angle);
+    set_rotation_mat_y(&rotx, cam->y_angle);
     Matrix3x3 rotz;
     set_rotation_mat_z(&rotz, cam->z_angle);
 
@@ -52,7 +52,7 @@ void draw_vertex(Screen screen, const Camera *cam, Vertex vertex, const char *st
 #endif
 
 #ifndef DEBUG
-    if (0 <= uvt.x && uvt.x <= 1 && 0 <= uvt.y && uvt.y <= 1) {
+    if (0 <= uvt.x && uvt.x <= 1 && 0 <= uvt.y && uvt.y <= 1 && uvt.z > 0) {
         draw_str(screen.w * uvt.x, screen.h * uvt.y, str);
     }
 #endif
@@ -61,7 +61,7 @@ void draw_vertex(Screen screen, const Camera *cam, Vertex vertex, const char *st
 void draw_vertecies(Screen screen, const Camera *cam, const Vertex *vertecies, int vertex_count) {
 
     Matrix3x3 rotx;
-    set_rotation_mat_z(&rotx, cam->x_angle);
+    set_rotation_mat_y(&rotx, cam->y_angle);
     Matrix3x3 rotz;
     set_rotation_mat_z(&rotz, cam->z_angle);
 
