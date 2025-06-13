@@ -1,6 +1,8 @@
+#define _XOPEN_SOURCE 500
+
 #include <fcntl.h>
-#include <unistd.h>
 #include <termios.h>
+#include <unistd.h>
 
 #include "drawing.h"
 #include "render.h"
@@ -42,21 +44,42 @@ int main() {
     const float CAM_ROT_SPEED = 0.01;
 
     char c = 'c';
+    long frame_time_ms = 30;
     while (1) {
         char input = -1;
         int result = read(STDIN_FILENO, &input, 1);
         if ('a' <= input && input <= 'z') {
             switch (input) {
-                case 'w': cam.position.x += CAM_SPEED; break;
-                case 'a': cam.position.y += CAM_SPEED; break;
-                case 's': cam.position.x -= CAM_SPEED; break;
-                case 'd': cam.position.y -= CAM_SPEED; break;
-                case 'j': cam.position.z += CAM_SPEED; break;
-                case 'k': cam.position.z -= CAM_SPEED; break;
-                case 'h': cam.z_angle -= CAM_SPEED; break;
-                case 'l': cam.z_angle += CAM_SPEED; break;
-                case 'u': cam.y_angle -= CAM_SPEED; break;
-                case 'n': cam.y_angle += CAM_SPEED; break;
+            case 'w':
+                cam.position.x += CAM_SPEED;
+                break;
+            case 'a':
+                cam.position.y += CAM_SPEED;
+                break;
+            case 's':
+                cam.position.x -= CAM_SPEED;
+                break;
+            case 'd':
+                cam.position.y -= CAM_SPEED;
+                break;
+            case 'j':
+                cam.position.z += CAM_SPEED;
+                break;
+            case 'k':
+                cam.position.z -= CAM_SPEED;
+                break;
+            case 'h':
+                cam.z_angle -= CAM_SPEED;
+                break;
+            case 'l':
+                cam.z_angle += CAM_SPEED;
+                break;
+            case 'u':
+                cam.y_angle -= CAM_SPEED;
+                break;
+            case 'n':
+                cam.y_angle += CAM_SPEED;
+                break;
             }
             input = -1;
         }

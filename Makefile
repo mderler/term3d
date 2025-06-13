@@ -1,7 +1,7 @@
 .PHONY: bin
 bin:
 	mkdir -p bin
-	cc -g -o bin/main -lm main.c render.c drawing.c vmath.c
+	gcc -std=c99 -o bin/main main.c render.c drawing.c vmath.c -lm
 
 .PHONY: run
 run: bin
